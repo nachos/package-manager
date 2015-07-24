@@ -5,84 +5,93 @@ var sinon = require('sinon');
 var Q = require('Q');
 var expect = chai.expect;
 var mockery = require('mockery');
+var rimraf = require('rimraf');
 
 chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
-describe('login', function () {
-  describe('with invalid parameters', function () {
+describe('uninstall', function () {
+  describe('without package name parameter', function () {
     var packageManager = require('../lib');
 
-    it('should be rejected with empty data', function () {
-      return expect(packageManager.login()).to.eventually.be.rejectedWith(TypeError);
-    });
-
-    it('should be rejected with invalid email', function () {
-      return expect(packageManager.login({password: 'password'})).to.eventually.be.rejectedWith(TypeError);
-    });
-
-    it('should be rejected with invalid password', function () {
-      return expect(packageManager.login({email: 'email'})).to.eventually.be.rejectedWith(TypeError);
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.uninstall()).to.eventually.be.rejectedWith(TypeError);
     });
   });
 
-  describe('with valid parameters', function () {
+  describe('with non-existing package', function () {
     var packageManager;
 
-    describe('with correct data', function () {
-      beforeEach(function () {
-        var packageManagerMock = function () {
-          return {
-            connect: sinon.stub().returns(Q.resolve())
-          };
+    beforeEach(function () {
+      var settingsFileMock = function () {
+        return {
+          delete: sinon.stub().returns(Q.reject('Non existing folder'))
         };
+      };
 
-        mockery.registerMock('nachos-server-api', packageManagerMock);
-        mockery.enable({
-          useCleanCache: true,
-          warnOnReplace: false,
-          warnOnUnregistered: false
-        });
-
-        packageManager = require('../lib');
+      mockery.registerMock('nachos-settings-file', settingsFileMock);
+      mockery.enable({
+        useCleanCache: true,
+        warnOnReplace: false,
+        warnOnUnregistered: false
       });
 
-      afterEach(function () {
-        mockery.deregisterMock('nachos-server-api');
-        mockery.disable();
-      });
-
-      it('should login successfully', function () {
-        return expect(packageManager.login({email: 'email', password: 'password'})).to.eventually.be.fulfilled;
-      });
+      packageManager = require('../lib');
     });
 
-    describe('with incorrect data', function () {
-      beforeEach(function () {
-        var packageManagerMock = function () {
-          return {
-            connect: sinon.stub().returns(Q.reject())
-          };
+    afterEach(function () {
+      mockery.deregisterMock('nachos-settings-file');
+      mockery.disable();
+    });
+
+    it('should be rejected', function () {
+      return expect(packageManager.uninstall('test')).to.eventually.be.rejectedWith('Non existing folder');
+    });
+  });
+
+  describe('with existing package', function () {
+    var packageManager;
+
+    beforeEach(function () {
+      var nachosConfigMock = {
+        get: sinon.stub().returns(Q.resolve({packages: 'path'}))
+      };
+
+      var settingsFileMock = function () {
+        return {
+          delete: sinon.stub().returns(Q.resolve())
         };
+      };
 
-        mockery.registerMock('nachos-server-api', packageManagerMock);
-        mockery.enable({
-          useCleanCache: true,
-          warnOnReplace: false,
-          warnOnUnregistered: false
-        });
+      var packagesMock = {
+        getFolderByPackage: sinon.stub().returns(Q.resolve('testFolder'))
+      };
 
-        packageManager = require('../lib');
+      rimraf = sinon.stub().callsArgWith(1, null);
+
+      mockery.registerMock('nachos-config', nachosConfigMock);
+      mockery.registerMock('nachos-settings-file', settingsFileMock);
+      mockery.registerMock('nachos-packages', packagesMock);
+      mockery.registerMock('rimraf', rimraf);
+      mockery.enable({
+        useCleanCache: true,
+        warnOnReplace: false,
+        warnOnUnregistered: false
       });
 
-      afterEach(function () {
-        mockery.deregisterMock('nachos-server-api');
-        mockery.disable();
-      });
+      packageManager = require('../lib');
+    });
 
-      it('should not login', function () {
-        return expect(packageManager.login({email: 'email', password: 'password'})).to.eventually.be.rejected;
-      });
+    afterEach(function () {
+      mockery.deregisterMock('nachos-config');
+      mockery.deregisterMock('nachos-settings-file');
+      mockery.deregisterMock('nachos-packages');
+      mockery.deregisterMock('rimraf');
+      mockery.disable();
+    });
+
+    it('should be fulfilled', function () {
+      return expect(packageManager.uninstall('test')).to.eventually.be.fulfilled;
     });
   });
 });
