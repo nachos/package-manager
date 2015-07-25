@@ -5,7 +5,7 @@ var expect = chai.expect;
 
 chai.use(require('chai-as-promised'));
 
-describe('exports', function () {
+xdescribe('exports', function () {
   var packageManager = require('../lib');
 
   it('should be an object', function () {
