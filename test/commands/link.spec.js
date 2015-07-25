@@ -138,5 +138,50 @@ describe('link', function () {
           });
       });
     });
+
+    describe('destination from source not exist', function () {
+      var symlinkStub = sinon.stub().callsArgWith(3, null, 'test');
+
+      before(function () {
+        fs.lstat = sinon.stub().callsArgWith(1, null, Q.reject({code: 'ENOENT'}));
+
+        fs.readlink = sinon.stub().callsArgWith(1, null, 'test');
+        fs.symlink = symlinkStub;
+        rimraf = sinon.stub().callsArgWith(1, null);
+
+        mockery.registerMock('fs', fs);
+        mockery.registerMock('rimraf', rimraf);
+      });
+
+      after(function () {
+        mockery.deregisterMock('fs');
+        mockery.deregisterMock('rimraf');
+      });
+
+      it('should recreate link', function () {
+        return packageManager.link('test')
+          .then(function (data) {
+            expect(data).to.be.deep.equal({src: 'test', dest: 'test'});
+
+            return expect(symlinkStub).to.have.been.calledOnce;
+          });
+      });
+    });
+
+    describe('no permissions to check destination from source', function () {
+      before(function () {
+        fs.lstat = sinon.stub().callsArgWith(1, null, Q.reject({code: 'ENOPER'}));
+
+        mockery.registerMock('fs', fs);
+      });
+
+      after(function () {
+        mockery.deregisterMock('fs');
+      });
+
+      it('should be rejected', function () {
+        return expect(packageManager.link('test')).to.eventually.be.rejected;
+      });
+    });
   });
 });

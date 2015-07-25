@@ -10,7 +10,7 @@ var rimraf = require('rimraf');
 chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
-xdescribe('uninstall', function () {
+describe('uninstall', function () {
   describe('without package name parameter', function () {
     var packageManager = require('../../lib');
 

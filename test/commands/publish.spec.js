@@ -9,7 +9,7 @@ var mockery = require('mockery');
 chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
-xdescribe('publish', function () {
+describe('publish', function () {
   describe('without source parameter', function () {
     var packageManager = require('../../lib');
 
