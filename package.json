@@ -2,7 +2,7 @@
   "name": "nachos-package-manager",
   "version": "1.0.0",
   "description": "The official nachos package manager",
-  "main": "lib\\index.js",
+  "main": "lib/index.js",
   "bin": {
     "nachos": "./bin/nachos"
   },
