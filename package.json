@@ -57,6 +57,7 @@
     "jsonfile": "^2.0.1",
     "lodash": "^3.9.3",
     "nachos-packages": "^1.0.1",
+    "nachos-server-api": "^1.0.1",
     "nachos-settings-file": "^1.0.2",
     "q": "^1.4.1",
     "rimraf": "^2.4.0"

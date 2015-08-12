@@ -37,7 +37,7 @@ describe('install', function () {
 
       rimraf = sinon.stub().callsArgWith(1, null);
 
-      downloader = sinon.stub().callsArgWith(1, null);
+      downloader = sinon.stub().returns(Q.resolve());
 
       childProcess.exec = sinon.stub().callsArgWith(2, null);
 
