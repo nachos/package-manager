@@ -25,7 +25,10 @@ describe('link', function () {
 
     beforeEach(function () {
       var jsonfile = {
-        readFile: sinon.stub().callsArgWith(1, null, {name: 'test', type: 'test'})
+        readFile: sinon.stub().callsArgWith(1, null, {
+          name: 'test',
+          type: 'test'
+        })
       };
 
       var packagesMock = {
@@ -68,7 +71,10 @@ describe('link', function () {
         });
 
         it('should not recreate link', function () {
-          return expect(packageManager.link('test')).to.eventually.be.deep.equal({src: 'test', dest: 'test'});
+          return expect(packageManager.link('test')).to.eventually.be.deep.equal({
+            src: 'test',
+            dest: 'test'
+          });
         });
       });
 
@@ -98,7 +104,10 @@ describe('link', function () {
         it('should recreate link', function () {
           return packageManager.link('test')
             .then(function (data) {
-              expect(data).to.be.deep.equal({src: 'test', dest: 'test'});
+              expect(data).to.be.deep.equal({
+                src: 'test',
+                dest: 'test'
+              });
 
               return expect(symlinkStub).to.have.been.calledOnce;
             });
@@ -132,7 +141,10 @@ describe('link', function () {
       it('should recreate link', function () {
         return packageManager.link('test')
           .then(function (data) {
-            expect(data).to.be.deep.equal({src: 'test', dest: 'test'});
+            expect(data).to.be.deep.equal({
+              src: 'test',
+              dest: 'test'
+            });
 
             return expect(symlinkStub).to.have.been.calledOnce;
           });
@@ -161,7 +173,10 @@ describe('link', function () {
       it('should recreate link', function () {
         return packageManager.link('test')
           .then(function (data) {
-            expect(data).to.be.deep.equal({src: 'test', dest: 'test'});
+            expect(data).to.be.deep.equal({
+              src: 'test',
+              dest: 'test'
+            });
 
             return expect(symlinkStub).to.have.been.calledOnce;
           });

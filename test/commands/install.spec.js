@@ -26,7 +26,10 @@ describe('install', function () {
       var serverApiMock = function () {
         return {
           packages: {
-            byName: sinon.stub().returns(Q.resolve({name: 'test', type: 'test'}))
+            byName: sinon.stub().returns(Q.resolve({
+              name: 'test',
+              type: 'test'
+            }))
           }
         };
       };

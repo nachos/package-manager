@@ -53,7 +53,10 @@ describe('login', function () {
       });
 
       it('should login successfully', function () {
-        return expect(packageManager.login({email: 'email', password: 'password'})).to.eventually.be.fulfilled;
+        return expect(packageManager.login({
+          email: 'email',
+          password: 'password'
+        })).to.eventually.be.fulfilled;
       });
     });
 
@@ -81,7 +84,10 @@ describe('login', function () {
       });
 
       it('should not login', function () {
-        return expect(packageManager.login({email: 'email', password: 'password'})).to.eventually.be.rejected;
+        return expect(packageManager.login({
+          email: 'email',
+          password: 'password'
+        })).to.eventually.be.rejected;
       });
     });
   });
