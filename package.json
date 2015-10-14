@@ -62,7 +62,7 @@
     "nachos-config": "^1.0.0",
     "nachos-open": "^0.1.0",
     "nachos-packages": "^1.2.0",
-    "nachos-server-api": "^1.0.1",
+    "nachos-server-api": "nachos/server-api",
     "nachos-settings-file": "^1.0.3",
     "q": "^1.4.1",
     "rimraf": "^2.4.2",
