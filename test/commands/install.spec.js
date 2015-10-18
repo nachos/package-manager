@@ -17,9 +17,13 @@ describe('install', function () {
     it('should be rejected with TypeError', function () {
       expect(packageManager.install()).to.eventually.be.rejectedWith(TypeError);
     });
+
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.install(12)).to.eventually.be.rejectedWith(TypeError);
+    });
   });
 
-  describe('with valid package name', function () {
+  describe('with valid parameters', function () {
     var packageManager;
 
     beforeEach(function () {

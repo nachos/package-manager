@@ -10,15 +10,43 @@ chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
 describe('publish', function () {
-  describe('without source parameter', function () {
+  describe('with invalid source parameter', function () {
     var packageManager = require('../../lib');
 
     it('should be rejected with TypeError', function () {
       expect(packageManager.publish()).to.eventually.be.rejectedWith(TypeError);
     });
+
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.publish(12)).to.eventually.be.rejectedWith(TypeError);
+    });
   });
 
-  describe('with valid source', function () {
+  describe('with invalid os parameter', function () {
+    var packageManager = require('../../lib');
+
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.publish('source')).to.eventually.be.rejectedWith(TypeError);
+    });
+
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.publish('source', 12)).to.eventually.be.rejectedWith(TypeError);
+    });
+  });
+
+  describe('with invalid arch parameter', function () {
+    var packageManager = require('../../lib');
+
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.publish('source', 'os')).to.eventually.be.rejectedWith(TypeError);
+    });
+
+    it('should be rejected with TypeError', function () {
+      expect(packageManager.publish('source', 'os', 12)).to.eventually.be.rejectedWith(TypeError);
+    });
+  });
+
+  describe('with valid parameters', function () {
     var packageManager;
 
     beforeEach(function () {
@@ -53,8 +81,11 @@ describe('publish', function () {
             connected: function () {
               return true;
             },
+            setToken: function () {
+              return true;
+            },
             packages: {
-              add: function () {
+              upload: function () {
                 return true;
               }
             }
@@ -69,7 +100,7 @@ describe('publish', function () {
       });
 
       it('should be fulfilled', function () {
-        return expect(packageManager.publish('test')).to.eventually.be.fulfilled;
+        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.fulfilled;
       });
     });
 
@@ -79,6 +110,9 @@ describe('publish', function () {
           return {
             connected: function () {
               return false;
+            },
+            setToken: function () {
+              return true;
             }
           };
         };
@@ -91,7 +125,7 @@ describe('publish', function () {
       });
 
       it('should be rejected', function () {
-        return expect(packageManager.publish('test')).to.eventually.be.rejectedWith('not logged in');
+        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith('not logged in');
       });
     });
   });
