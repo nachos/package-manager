@@ -33,7 +33,7 @@ describe('login', function () {
       beforeEach(function () {
         var packageManagerMock = function () {
           return {
-            connect: sinon.stub().returns(Q.resolve())
+            connect: sinon.stub().returns(Q.resolve('token'))
           };
         };
 

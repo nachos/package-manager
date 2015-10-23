@@ -19,6 +19,14 @@ describe('auth', function () {
       });
     });
 
+    describe('with invalid token type', function () {
+      var auth = require('../lib/auth');
+
+      it('should be rejected with TypeError', function () {
+        return expect(auth.set(true)).to.eventually.be.rejectedWith('token must be a string');
+      });
+    });
+
     describe('with a valid token', function () {
       var auth;
 
