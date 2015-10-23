@@ -28,13 +28,26 @@ describe('install', function () {
 
     beforeEach(function () {
       var serverApiMock = function () {
+        var stream = {
+          pipe: function () {
+            return stream;
+          },
+          on: function (name, cb) {
+            cb();
+
+            return stream;
+          }
+        };
+
         return {
           packages: {
             byName: sinon.stub().returns(Q.resolve({
               name: 'test',
               type: 'test'
-            }))
-          }
+            })),
+            download: sinon.stub().returns(Q.resolve(stream))
+          },
+          setToken: sinon.stub()
         };
       };
 

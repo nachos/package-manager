@@ -5,6 +5,7 @@ var expect = chai.expect;
 var childProcess = require('child_process');
 var sinon = require('sinon');
 var mockery = require('mockery');
+var Q = require('q');
 
 chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
@@ -86,17 +87,24 @@ describe('publish', function () {
             },
             packages: {
               upload: function () {
-                return true;
+                return Q.resolve(true);
               }
             }
           };
         };
+
+        var settingsFile = sinon.stub().returns({
+          get: sinon.stub().returns(Q.resolve({token: 'token'}))
+        });
+
+        mockery.registerMock('nachos-settings-file', settingsFile);
 
         mockery.registerMock('nachos-server-api', serverApiMock);
       });
 
       after(function () {
         mockery.deregisterMock('nachos-server-api');
+        mockery.deregisterMock('nachos-settings-file');
       });
 
       it('should be fulfilled', function () {
@@ -125,7 +133,7 @@ describe('publish', function () {
       });
 
       it('should be rejected', function () {
-        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith('not logged in');
+        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith('There is no logged-in user.');
       });
     });
   });
