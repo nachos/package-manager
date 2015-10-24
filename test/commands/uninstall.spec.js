@@ -2,7 +2,7 @@
 
 var chai = require('chai');
 var sinon = require('sinon');
-var Q = require('Q');
+var Q = require('q');
 var expect = chai.expect;
 var mockery = require('mockery');
 var rimraf = require('rimraf');
