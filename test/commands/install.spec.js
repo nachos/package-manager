@@ -11,15 +11,41 @@ var fs = require('fs');
 var childProcess = require('child_process');
 
 describe('install', function () {
-  describe('without source parameter', function () {
-    var packageManager = require('../../lib');
+  describe('with invalid parameters', function () {
+    describe('source parameter', function () {
+      var packageManager = require('../../lib');
 
-    it('should be rejected with TypeError', function () {
-      expect(packageManager.install()).to.eventually.be.rejectedWith(TypeError);
+      describe('empty', function () {
+        it('should be rejected with TypeError', function () {
+          expect(packageManager.install()).to.eventually.be.rejectedWith(TypeError);
+        });
+      });
+
+      describe('number', function () {
+        it('should be rejected with TypeError', function () {
+          expect(packageManager.install(12)).to.eventually.be.rejectedWith(TypeError);
+        });
+      });
     });
 
-    it('should be rejected with TypeError', function () {
-      expect(packageManager.install(12)).to.eventually.be.rejectedWith(TypeError);
+    describe('os parameter', function () {
+      var packageManager = require('../../lib');
+
+      describe('number', function () {
+        it('should be rejected with TypeError', function () {
+          expect(packageManager.install('test', 1)).to.eventually.be.rejectedWith(TypeError);
+        });
+      });
+    });
+
+    describe('arch parameter', function () {
+      var packageManager = require('../../lib');
+
+      describe('number', function () {
+        it('should be rejected with TypeError', function () {
+          expect(packageManager.install('test', 'test', 1)).to.eventually.be.rejectedWith(TypeError);
+        });
+      });
     });
   });
 
@@ -30,12 +56,12 @@ describe('install', function () {
       var serverApiMock = function () {
         var stream = {
           pipe: function () {
-            return stream;
+            return this;
           },
           on: function (name, cb) {
             cb();
 
-            return stream;
+            return this;
           }
         };
 
@@ -83,6 +109,32 @@ describe('install', function () {
       mockery.deregisterMock('git-downloader');
       mockery.deregisterMock('child-process');
       mockery.disable();
+    });
+
+    describe('without logged-in user', function () {
+      before(function () {
+        var settingsFileMock = function () {
+          return {
+            get: sinon.stub().returns(Q.resolve({}))
+          };
+        };
+
+        var nachosConfigMock = {
+          get: sinon.stub().returns(Q.resolve({}))
+        };
+
+        mockery.registerMock('nachos-config', nachosConfigMock);
+        mockery.registerMock('nachos-settings-file', settingsFileMock);
+      });
+
+      after(function () {
+        mockery.deregisterMock('nachos-config');
+        mockery.deregisterMock('nachos-settings-file');
+      });
+
+      it('should be rejected', function () {
+        return expect(packageManager.install('test')).to.eventually.be.rejectedWith('There is no logged-in user');
+      });
     });
 
     it('should be fine', function () {
