@@ -81,12 +81,19 @@ describe('install', function () {
         getFolderByType: sinon.stub().returns(Q.resolve(''))
       };
 
+      var settingsFileMock = function () {
+        return {
+          get: sinon.stub().returns(Q.resolve({token: 'token'}))
+        };
+      };
+
       rimraf = sinon.stub().callsArgWith(1, null);
 
       downloader = sinon.stub().returns(Q.resolve());
 
       childProcess.exec = sinon.stub().callsArgWith(2, null);
 
+      mockery.registerMock('nachos-settings-file', settingsFileMock);
       mockery.registerMock('nachos-packages', packagesMock);
       mockery.registerMock('nachos-server-api', serverApiMock);
       mockery.registerMock('rimraf', rimraf);
@@ -98,11 +105,10 @@ describe('install', function () {
         warnOnReplace: false,
         warnOnUnregistered: false
       });
-
-      packageManager = require('../../lib');
     });
 
     afterEach(function () {
+      mockery.deregisterMock('nachos-settings-file');
       mockery.deregisterMock('nachos-packages');
       mockery.deregisterMock('nachos-server-api');
       mockery.deregisterMock('rimraf');
@@ -111,8 +117,72 @@ describe('install', function () {
       mockery.disable();
     });
 
+    describe('destination folder is a symbolic link', function () {
+      beforeEach(function () {
+        fs.lstat = sinon.stub().callsArgWith(1, null, Q.resolve({
+          isSymbolicLink: function () {
+            return true;
+          }
+        }));
+
+        fs.unlink = sinon.stub().callsArgWith(1, null, Q.resolve({}));
+
+        mockery.registerMock('fs', fs);
+
+        packageManager = require('../../lib');
+      });
+
+      afterEach(function () {
+        mockery.deregisterMock('fs');
+      });
+
+      it('should remove link and not call rimraf', function () {
+        return packageManager.install('test')
+          .then(function () {
+            expect(rimraf).to.have.callCount(0);
+
+            return expect(fs.unlink).to.have.been.calledOnce;
+          });
+      });
+    });
+
+    describe('destination folder is not asymbolic link', function () {
+      beforeEach(function () {
+        fs.lstat = sinon.stub().callsArgWith(1, null, Q.resolve({
+          isSymbolicLink: function () {
+            return false;
+          }
+        }));
+
+        mockery.registerMock('fs', fs);
+
+        packageManager = require('../../lib');
+      });
+
+      afterEach(function () {
+        mockery.deregisterMock('fs');
+      });
+
+      it('should call rimraf', function () {
+        return packageManager.install('test')
+          .then(function () {
+            return expect(rimraf).to.have.been.calledOnce;
+          });
+      });
+    });
+
+    describe('with logged-in user', function () {
+      beforeEach(function () {
+        packageManager = require('../../lib');
+      });
+
+      it('should be fine', function () {
+        return expect(packageManager.install('test')).to.eventually.be.fulfilled;
+      });
+    });
+
     describe('without logged-in user', function () {
-      before(function () {
+      beforeEach(function () {
         var settingsFileMock = function () {
           return {
             get: sinon.stub().returns(Q.resolve({}))
@@ -125,9 +195,11 @@ describe('install', function () {
 
         mockery.registerMock('nachos-config', nachosConfigMock);
         mockery.registerMock('nachos-settings-file', settingsFileMock);
+
+        packageManager = require('../../lib');
       });
 
-      after(function () {
+      afterEach(function () {
         mockery.deregisterMock('nachos-config');
         mockery.deregisterMock('nachos-settings-file');
       });
@@ -137,37 +209,41 @@ describe('install', function () {
       });
     });
 
-    it('should be fine', function () {
-      return expect(packageManager.install('test')).to.eventually.be.fulfilled;
-    });
+    describe('package.json', function () {
+      describe('exist in the destination folder', function () {
+        beforeEach(function () {
+          fs.access = sinon.stub().callsArgWith(1, null);
 
-    describe('there is a package.json in the destination folder', function () {
-      before(function () {
-        fs.access = sinon.stub().callsArgWith(1, null);
-        mockery.registerMock('fs', fs);
+          mockery.registerMock('fs', fs);
+
+          packageManager = require('../../lib');
+        });
+
+        afterEach(function () {
+          mockery.deregisterMock('fs');
+        });
+
+        it('should be fulfilled', function () {
+          return expect(packageManager.install('test')).to.eventually.be.fulfilled;
+        });
       });
 
-      after(function () {
-        mockery.deregisterMock('fs');
-      });
+      describe('not exist in the destination folder', function () {
+        beforeEach(function () {
+          fs.access = sinon.stub().callsArgWith(1, null, Q.reject());
 
-      it('should be fulfilled', function () {
-        return expect(packageManager.install('test')).to.eventually.be.fulfilled;
-      });
-    });
+          mockery.registerMock('fs', fs);
 
-    describe('there is no package.json in the destination folder', function () {
-      before(function () {
-        fs.access = sinon.stub().callsArgWith(1, null, Q.reject());
-        mockery.registerMock('fs', fs);
-      });
+          packageManager = require('../../lib');
+        });
 
-      after(function () {
-        mockery.deregisterMock('fs');
-      });
+        afterEach(function () {
+          mockery.deregisterMock('fs');
+        });
 
-      it('should be fulfilled', function () {
-        return expect(packageManager.install('test')).to.eventually.be.fulfilled;
+        it('should be fulfilled', function () {
+          return expect(packageManager.install('test')).to.eventually.be.fulfilled;
+        });
       });
     });
   });

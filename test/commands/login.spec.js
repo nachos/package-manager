@@ -31,13 +31,21 @@ describe('login', function () {
 
     describe('with correct data', function () {
       beforeEach(function () {
-        var packageManagerMock = function () {
+        var serverApiMock = function () {
           return {
             connect: sinon.stub().returns(Q.resolve('token'))
           };
         };
 
-        mockery.registerMock('nachos-server-api', packageManagerMock);
+        var settingsFileMock = function () {
+          return {
+            set: sinon.stub()
+          };
+        };
+
+        mockery.registerMock('nachos-server-api', serverApiMock);
+        mockery.registerMock('nachos-settings-file', settingsFileMock);
+
         mockery.enable({
           useCleanCache: true,
           warnOnReplace: false,
@@ -49,6 +57,7 @@ describe('login', function () {
 
       afterEach(function () {
         mockery.deregisterMock('nachos-server-api');
+        mockery.deregisterMock('nachos-settings-file');
         mockery.disable();
       });
 

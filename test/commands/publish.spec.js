@@ -45,6 +45,12 @@ describe('publish', function () {
         expect(packageManager.publish('source', 12)).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target os must be a string');
       });
     });
+
+    describe('with not string parameter', function () {
+      it('should be rejected with TypeError', function () {
+        expect(packageManager.publish('source', 'win')).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target os must be a string');
+      });
+    });
   });
 
   describe('with invalid arch parameter', function () {
@@ -52,13 +58,19 @@ describe('publish', function () {
 
     describe('with empty parameter', function () {
       it('should be rejected with TypeError', function () {
-        expect(packageManager.publish('source', 'os')).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target arch must be provided');
+        expect(packageManager.publish('source', 'win32')).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target arch must be provided');
       });
     });
 
     describe('with not string parameter', function () {
       it('should be rejected with TypeError', function () {
-        expect(packageManager.publish('source', 'os', 12)).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target arch must be a string');
+        expect(packageManager.publish('source', 'win32', 12)).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target arch must be a string');
+      });
+    });
+
+    describe('with not existing arch', function () {
+      it('should be rejected with TypeError', function () {
+        expect(packageManager.publish('source', 'win32', 'x32')).to.eventually.be.rejectedWith(TypeError, 'nachos-package-manager publish: target arch must be one of the following');
       });
     });
   });
@@ -146,7 +158,7 @@ describe('publish', function () {
       });
 
       it('should be rejected', function () {
-        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith('can\'t publish private package');
+        return expect(packageManager.publish('test', 'win32', 'x64')).to.eventually.be.rejectedWith('can\'t publish private package');
       });
     });
 
@@ -179,7 +191,7 @@ describe('publish', function () {
       });
 
       it('should be rejected', function () {
-        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith('There is no logged-in user.');
+        return expect(packageManager.publish('test', 'win32', 'x64')).to.eventually.be.rejectedWith('There is no logged-in user.');
       });
     });
 
@@ -259,7 +271,7 @@ describe('publish', function () {
         });
 
         it('should be rejected', function () {
-          return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith({
+          return expect(packageManager.publish('test', 'win32', 'x64')).to.eventually.be.rejectedWith({
             response: {
               statusCode: 500
             }
@@ -330,7 +342,7 @@ describe('publish', function () {
         });
 
         it('should be fulfilled', function () {
-          return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.rejectedWith('permission denied, you are not an owner of this package');
+          return expect(packageManager.publish('test', 'win32', 'x64')).to.eventually.be.rejectedWith('permission denied, you are not an owner of this package');
         });
       });
     });
@@ -392,7 +404,7 @@ describe('publish', function () {
       });
 
       it('should be fulfilled', function () {
-        return expect(packageManager.publish('test', 'os', 'arch')).to.eventually.be.fulfilled;
+        return expect(packageManager.publish('test', 'win32', 'x64')).to.eventually.be.fulfilled;
       });
     });
   });
