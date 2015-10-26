@@ -117,6 +117,42 @@ describe('install', function () {
       mockery.disable();
     });
 
+    describe('destination folder is not exist', function () {
+      beforeEach(function () {
+        fs.lstat = sinon.stub().callsArgWith(1, null, Q.reject({code: 'ENOENT'}));
+
+        mockery.registerMock('fs', fs);
+
+        packageManager = require('../../lib');
+      });
+
+      afterEach(function () {
+        mockery.deregisterMock('fs');
+      });
+
+      it('should be resolved and continue to install', function () {
+        return expect(packageManager.install('test')).to.eventually.be.fulfilled;
+      });
+    });
+
+    describe('destination folder lstat no permissions', function () {
+      beforeEach(function () {
+        fs.lstat = sinon.stub().callsArgWith(1, null, Q.reject({code: 'ENOPER'}));
+
+        mockery.registerMock('fs', fs);
+
+        packageManager = require('../../lib');
+      });
+
+      afterEach(function () {
+        mockery.deregisterMock('fs');
+      });
+
+      it('should be resolved and continue to install', function () {
+        return expect(packageManager.install('test')).to.eventually.be.rejectedWith({code: 'ENOPER'});
+      });
+    });
+
     describe('destination folder is a symbolic link', function () {
       beforeEach(function () {
         fs.lstat = sinon.stub().callsArgWith(1, null, Q.resolve({
